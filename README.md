@@ -1,0 +1,1 @@
+This is a databse porject that emulates a store, specifically a mango shop! Its a bit janky, but it runs (mostly) concurrently taking into account ACID principles. Database done in Postgre, but it should work with a variety of SQL based databases.
