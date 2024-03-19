@@ -1,0 +1,153 @@
+-- Database: MangoExpress
+
+-- DROP DATABASE IF EXISTS "MangoExpress";
+
+CREATE DATABASE "MangoExpress"
+    WITH
+    OWNER = ms
+    ENCODING = 'UTF8'
+    LC_COLLATE = 'en_US.UTF-8'
+    LC_CTYPE = 'en_US.UTF-8'
+    LOCALE_PROVIDER = 'libc'
+    TABLESPACE = pg_default
+    CONNECTION LIMIT = -1
+    IS_TEMPLATE = False;
+
+-- Table: public.customers
+
+-- DROP TABLE IF EXISTS public.customers;
+
+CREATE TABLE IF NOT EXISTS public.customers
+(
+    id integer NOT NULL DEFAULT nextval('customers_id_seq'::regclass),
+    name text COLLATE pg_catalog."default" NOT NULL,
+    email text COLLATE pg_catalog."default" NOT NULL,
+    address text COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT customers_pkey PRIMARY KEY (id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.customers
+    OWNER to ms;
+-- Index: Customer Info
+
+-- DROP INDEX IF EXISTS public."Customer Info";
+
+CREATE INDEX IF NOT EXISTS "Customer Info"
+    ON public.customers USING btree
+    (name COLLATE pg_catalog."default" ASC NULLS LAST)
+    INCLUDE(name, email, address)
+    WITH (deduplicate_items=True)
+    TABLESPACE pg_default;
+
+-- Table: public.orders
+
+-- DROP TABLE IF EXISTS public.orders;
+
+CREATE TABLE IF NOT EXISTS public.orders
+(
+    id integer NOT NULL DEFAULT nextval('orders_id_seq'::regclass),
+    customer_id integer NOT NULL,
+    order_date date NOT NULL,
+    shipped_date date NOT NULL,
+    total_price numeric NOT NULL,
+    status text COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT orders_pkey PRIMARY KEY (id),
+    CONSTRAINT "customer.id" FOREIGN KEY (customer_id)
+        REFERENCES public.customers (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.orders
+    OWNER to ms;
+-- Index: Order
+
+-- DROP INDEX IF EXISTS public."Order";
+
+CREATE INDEX IF NOT EXISTS "Order"
+    ON public.orders USING btree
+    (customer_id ASC NULLS LAST)
+    INCLUDE(customer_id, order_date, shipped_date, total_price, status)
+    WITH (deduplicate_items=True)
+    TABLESPACE pg_default;
+
+-- Table: public.products
+
+-- DROP TABLE IF EXISTS public.products;
+
+CREATE TABLE IF NOT EXISTS public.products
+(
+    id integer NOT NULL DEFAULT nextval('products_id_seq'::regclass),
+    name text COLLATE pg_catalog."default" NOT NULL,
+    description text COLLATE pg_catalog."default" NOT NULL,
+    price numeric NOT NULL,
+    CONSTRAINT products_pkey PRIMARY KEY (id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.products
+    OWNER to ms;
+-- Index: Product Name
+
+-- DROP INDEX IF EXISTS public."Product Name";
+
+CREATE INDEX IF NOT EXISTS "Product Name"
+    ON public.products USING btree
+    (name COLLATE pg_catalog."default" ASC NULLS LAST)
+    INCLUDE(name)
+    WITH (deduplicate_items=True)
+    TABLESPACE pg_default;
+
+-- Table: public.unit_order
+
+-- DROP TABLE IF EXISTS public.unit_order;
+
+CREATE TABLE IF NOT EXISTS public.unit_order
+(
+    order_id integer NOT NULL,
+    product_id integer NOT NULL,
+    quantity integer NOT NULL,
+    price numeric NOT NULL,
+    CONSTRAINT unit_order_pkey PRIMARY KEY (order_id, product_id),
+    CONSTRAINT "order.id" FOREIGN KEY (order_id)
+        REFERENCES public.orders (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT "product.id" FOREIGN KEY (product_id)
+        REFERENCES public.products (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.unit_order
+    OWNER to ms;
+-- Index: Order Example
+
+-- DROP INDEX IF EXISTS public."Order Example";
+
+CREATE INDEX IF NOT EXISTS "Order Example"
+    ON public.unit_order USING btree
+    (order_id ASC NULLS LAST)
+    INCLUDE(order_id, quantity, price, product_id)
+    WITH (deduplicate_items=True)
+    TABLESPACE pg_default;
+    
+CREATE TABLE IF NOT EXISTS public.stock
+(
+    product_id integer NOT NULL,
+    "number" integer NOT NULL,
+    CONSTRAINT stock_pkey PRIMARY KEY (product_id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.stock
+    OWNER to ms;

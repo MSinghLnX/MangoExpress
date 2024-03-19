@@ -1,0 +1,10 @@
+ACID
+-----
+Atomicity: Operations are indivisible, once operation is happening, it is happening or not, little to no corruption, i.e. locks, race conditions, primitives, etc.
+Consistency: Values are consistent regardless of where you ask the question, all views of data are the same in space and time (Youtube view update, i.e there are multuple databases that may have different view values for videos)
+Isolation: Operations don't influence each other (uneccesarily)
+Durability: Once the database acknowledges a write operation, it's safe and persistent
+-----
+Transactions: Maintains ACID properties on databases, all queries are atomic (All of them worked, or none of them worked), succesful isolation
+
+Databases send acknowledgements that the changes that you've made have been written, 1) No ACK, 2) No RAM, 3) Write to disk (Domain/Use Problem)
